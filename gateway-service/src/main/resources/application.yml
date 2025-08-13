@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/users/**
+              filters:
+                - StripPrefix=1
+            - id: match-service
+              uri: lb://match-service
+              predicates:
+                - Path=/api/swipes/**, /api/matches/**
+            - id: discovery-service
+              uri: lb://discovery-service
+              predicates:
+                - Path=/api/discovery/**
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
