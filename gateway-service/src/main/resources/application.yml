@@ -108,13 +108,52 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      server:
-        webflux:
-          discovery:
-            locator:
-              enabled: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: test-route
+          uri: http://example.com  # ????????? ??????? ??? ????????????
+          predicates:
+            - Path=/test/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://auth-service:8082
+          jwk-set-uri: http://auth-service:8082/oauth2/jwks
 
 eureka:
   client:
     service-url:
       defaultZone: http://shinnn:12345@localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    healthcheck:
+      enabled: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    com.netflix.eureka: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET:default-secret-key-1234567890}
+  expiration: 86400000
